@@ -1,5 +1,5 @@
 /*
-*   Latex2Markdown Parser
+*   Latex2Markdown Lexer
 */
 %option noyywrap nodefault yylineno
 %{
@@ -38,6 +38,9 @@
 
 \n { return EOL; }
 
+[','|'.'] { return PONT; }
+
 . { yylval.c = strdup(yytext); return WORD; }
 
 %%
+[12pt,op2]
