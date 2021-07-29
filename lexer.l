@@ -7,9 +7,6 @@
 #include "parser.tab.h"
 %}
 
-/* float expoent */
-EXP ([Ee][-+]?[0-9]+)
-
 %%
 "[" |
 "]" |
@@ -41,6 +38,6 @@ EXP ([Ee][-+]?[0-9]+)
 
 \n { return EOL; }
 
-. { yylval.s = lookup(yytext); return WORD; }
+. { yylval.c = strdup(yytext); return WORD; }
 
 %%
