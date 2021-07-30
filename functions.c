@@ -365,6 +365,5 @@ void yyerror(char *s, ...){
 }
 
 int main(){
-    printf("> ");
     return yyparse();
 }

@@ -38,7 +38,7 @@
 
 \n { return EOL; }
 
-[','|'.'] { return PONT; }
+"."|"."|" " { yylval.c = strdup(yytext); return ACC; }
 
 . { yylval.c = strdup(yytext); return WORD; }
 

@@ -1,5 +1,5 @@
 /*
-*   Advanced Calculator parser
+*   Latex2Markdown Parser
 */
 
 %{
@@ -10,70 +10,72 @@
 
 %union{
     struct ast *a;
-    double d;
-    struct symbol *s;
-    struct symlist *sl;
-    int fn;
+    char *c;
 }
 
 /* token declaration */
-%token <d> NUMBER
-%token <s> NAME
-%token <fn> FUNC
+%token <c> WORD ACCE
 %token EOL
 
-%token IF THEN ELSE WHILE DO LET
+%token DOCCLASS PACKAGE TITLE AUTHOR DOCBEGIN DOCEND CHAPTER SECTION
+%token SUBSECTION SUBSUBSECTION PARAGRAPH BF UNDERLINE IT ENUMBEGIN
+%token ENUMEND ITEM ITEMBEGIN ITEMEND
 
-%nonassoc <fn> CMP
-%right '='
-%left '+' '-'
-%left '*' '/'
+%type <c> phrase 
+%type <a> latexDocument conf id main body
 
-%type <a> exp stmt list explist
-%type <sl> symlist
-
-%start calclist
+%start latexDocument
 %%
-stmt: IF exp THEN list { $$ = newflow('I', $2, $4, NULL); }
-    | IF exp THEN list ELSE list { $$ = newflow('I', $2, $4, $6); }
-    | WHILE exp DO list { $$ = newflow('W', $2, $4, NULL); }
-    | exp
-;
 
-list: /* empty */ { $$ = NULL; }
-    | stmt ';' list {if ($3 == NULL)
-                        $$ = $1;
-                    else
-                        $$ = newast('L', $1, $3);
-                    } 
-;
+latexDocument:
+    | DOCCLASS conf id main { $$ = newast('Begin', $2, newast('Conf',$3,$4)); }
+    ;
 
-exp: exp CMP exp { $$ = newcmp($2, $1, $3); }
-    | exp '+' exp { $$ = newast('+', $1, $3); }
-    | exp '-' exp { $$ = newast('-', $1, $3); }
-    | exp '*' exp { $$ = newast('*', $1, $3); }
-    | exp '/' exp { $$ = newast('/', $1, $3); }
-    | '(' exp ')' { $$ = $2; }
-    | NUMBER { $$ = newnum($1); }
-    | NAME { $$ = newref($1); }
-    | NAME '=' exp {$$ = newasgn($1, $3); }
-    | FUNC '(' explist ')' { $$ = newfunc($1, $3); }
-    | NAME '(' explist ')' { $$ = newcall($1, $3); }
-;
+conf: 
+    | '[' phrase ']' conf { $$ = newast('Conf', $2, $4); }
+    | '{' WORD '}' conf { $$ = newast('Conf', $2, $4); }
+    | PACKAGE '{' phrase '}' conf { $$ = newast('Conf', $3, $5); }
+    ;
 
-explist: exp
-    | exp ',' explist { $$ = newast('L', $1, $3); }
-;
+id: TITLE '{' phrase '}' id { $$ = newast('Conf', $3, $5); }
+    | AUTHOR '{' phrase '}' { $$ = newast('Conf', $3, NULL); }
+    ;
 
-symlist: NAME { $$ = newsymlist($1, NULL); }
-    | NAME ',' symlist { $$ = newsymlist($1, $3); }
-;
+main: DOCBEGIN body DOCEND { $$ = newast('', $2, NULL); }
 
-calclist: /* empty */
-    | calclist stmt EOL{
-        printf("= %4.4g\n>", eval($2));
-        treefree($2); }
-    | calclist LET NAME '(' symlist ')' '=' list EOL{
-        dodef($3, $5, $8);
-        printf("Defined %s\n>", $3->name); }
-    | calclist error EOL { yyerrok; printf("> "); }
+body:
+    | CHAPTER chapter body{ $$ = newast('C', $2, $3); }
+    | SECTION section body{ $$ = newast('S', $2, $3); }
+    | SUBSECTION subsection body{ $$ = newast('SB', $2, $3); }
+    | SUBSUBSECTION subsubsection body{ $$ = newast('SSB', $2, $3); }
+    | PARAGRAPH paragraph body{ $$ = newast('PG', $2, $3); }
+    | phrase body { $$ = newast('P', $1, $2); }
+    | phrase { $$ = newast('P', $1, NULL); }
+    ;
+
+chapter: '{' phrase '}' {}
+    | '{' phrase '}' phrase {}
+    ;
+
+section: '{' phrase '}' {}
+    | SECTION '{' phrase '}' phrase {}
+    ;
+
+subsection:'{' phrase '}' {}
+    | SUBSECTION '{' phrase '}' phrase {}
+    ;
+
+subsubsection: '{' phrase '}' {}
+    | SUBSUBSECTION '{' phrase '}' phrase {}
+    ;
+
+paragraph: '{' phrase '}' {}
+    | PARAGRAPH '{' phrase '}' phrase {}
+    ;
+
+phrase: WORD phrase { strcat($1, $2);  $$ = $1; }
+    | ACCE phrase {}
+    | ACCE
+    | WORD
+    ;
+
