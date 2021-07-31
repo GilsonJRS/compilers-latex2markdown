@@ -12,7 +12,16 @@ void yyerror(char *s, ...);
 * SB subsection
 * SSB subsubsection
 * PG paragraph
+* CC subs content
 * P phrase
+* B Bold
+* U underline
+* I italic
+* L lists
+* E enumerate
+* IT itemize
+* ITEM item
+* PK package
 */
 
 /* AST nodes */
@@ -24,7 +33,7 @@ struct ast{
 };
 
 struct phrase{
-    int nodetype; 
+    int nodetype;
     char *c;
 };
 
@@ -32,9 +41,11 @@ struct phrase{
 /* AST contruction */
 
 struct ast *newast(int nodetype, struct ast *l, struct ast *r);
+struct ast *newPhrase(char *c);
+
 
 /* AST avaliation */
-double eval(struct ast *);
+double writeOutput(struct ast *);
 
 /* Free AST */
 void treefree(struct ast *);
