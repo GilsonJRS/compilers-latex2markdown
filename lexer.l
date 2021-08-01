@@ -32,15 +32,12 @@
 "\\item" { return ITEM; }
 "\\begin{itemize}" { return ITEMBEGIN; }
 "\\end{itemize}" { return ITEMEND; }
+"\\maketitle" { return MAKETITLE; }
 
-"%".*
-[ \t]
-
-\n { return EOL; }
-
-"."|"."|" " { yylval.c = strdup(yytext); return ACC; }
-
-. { yylval.c = strdup(yytext); return WORD; }
-
+"%".* {/* comment */}
+\n 
+" "|"."|"," { yylval.c = strdup(yytext); return ACCE; }
+[a-zA-Z0-9]+   { yylval.c = strdup(yytext); return WORD; }
+[ \t] {}
+. 
 %%
-[12pt,op2]

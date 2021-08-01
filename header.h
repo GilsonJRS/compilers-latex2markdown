@@ -4,7 +4,11 @@
 
 /* Lexer interface */
 extern int yylineno;
+extern FILE *yyin;
+extern int yyleng;
 void yyerror(char *s, ...);
+int yylex();
+int yyparse();
 
 /* node types 
 * C chapter
@@ -27,28 +31,30 @@ void yyerror(char *s, ...);
 /* AST nodes */
 
 struct ast{
-    int nodetype;
+    char *nodetype;
     struct ast *l;
     struct ast *r;
 };
 
 struct phrase{
-    int nodetype;
+    char *nodetype;
     char *c;
 };
 
 
 /* AST contruction */
 
-struct ast *newast(int nodetype, struct ast *l, struct ast *r);
+struct ast *newast(char *nodetype, struct ast *l, struct ast *r);
 struct ast *newPhrase(char *c);
 
 
 /* AST avaliation */
-double writeOutput(struct ast *);
+void writeOutput(struct ast *);
 
 /* Free AST */
 void treefree(struct ast *);
 
 extern int yylineno;
 void yyerror(char *s, ...);
+
+void catstr(char **s1, char *s2);
