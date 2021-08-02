@@ -5,6 +5,7 @@
 /* Lexer interface */
 extern int yylineno;
 extern FILE *yyin;
+extern FILE *yyout;
 extern int yyleng;
 void yyerror(char *s, ...);
 int yylex();

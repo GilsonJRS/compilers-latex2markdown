@@ -86,109 +86,90 @@ void treefree(struct ast *a){
 
 void writeOutput(struct ast *a){
     if(a==NULL) return;
-    if(strcmp(a->nodetype, "Begin")==0){
-        printf("\nBegin\n");
-        writeOutput(a->l);
-        writeOutput(a->r);
-    }
-    else if(strcmp(a->nodetype, "Opts")==0){
-        printf("Opts: %s\n", ((struct phrase *)a->l)->c);
-        writeOutput(a->r);
-    }
-    else if(strcmp(a->nodetype, "Class")==0){
-        printf("Class: %s\n", ((struct phrase *)a->l)->c);
-        writeOutput(a->r);
-    }
-    else if(strcmp(a->nodetype, "PK")==0){
-        printf("Package: %s\n", ((struct phrase *)a->l)->c);
-        writeOutput(a->r);
-    }
-    else if(strcmp(a->nodetype, "Main")==0){
-        printf("\nMain\n");
-        if(a->l!=NULL)
-            writeOutput(a->l);
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    } 
-    else if(strcmp(a->nodetype, "Title")==0
-        || strcmp(a->nodetype, "Author")==0
-        ){
-        printf("%s: %s\n", a->nodetype, ((struct phrase *)a->l)->c);
-        if(a->l!=NULL)
-            writeOutput(a->l);
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "Body")==0){
-        printf("\nBody\n");
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "C")==0){
-        printf("#\n");
-    }else if(strcmp(a->nodetype, "S")==0){
-        printf("##\n");
-        if(a->l!=NULL)
-            writeOutput(a->l);
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "SB")==0){
-        printf("###\n");
-        if(a->l!=NULL)
-            writeOutput(a->l);
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "SSB")==0){
-        printf("###\n");
-        if(a->l!=NULL)
-            writeOutput(a->l);
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "PG")==0){
-        printf("####\n");
-        if(a->l!=NULL)
-            writeOutput(a->l);
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "CC")==0){
-        printf("%s\n", ((struct phrase *)a->l)->c);
-    }else if(strcmp(a->nodetype, "B")==0){
-        printf("**%s**\n", ((struct phrase *)a->l)->c);
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "U")==0){
-        printf("<u>%s</u>\n", ((struct phrase *)a->l)->c);
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "I")==0){
-        printf("*%s*\n", ((struct phrase *)a->l)->c);
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "PH")==0){
-        if(a->l!=NULL)
-            printf("%s\n", ((struct phrase *)a->l)->c);
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "Co")==0){
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "L")==0){
-        if(a->l!=NULL)
-            writeOutput(a->l);
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "E")==0
+    if(strcmp(a->nodetype, "Begin")==0
+        || strcmp(a->nodetype, "Main")==0
+        || strcmp(a->nodetype, "L")==0
+        || strcmp(a->nodetype, "E")==0
         || strcmp(a->nodetype, "IT")==0){
         if(a->l!=NULL)
             writeOutput(a->l);
         if(a->r!=NULL)
             writeOutput(a->r);
+    }
+    else if(strcmp(a->nodetype, "Body")==0
+        || strcmp(a->nodetype, "Co")==0){
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "Class")==0
+        || strcmp(a->nodetype, "Opts")==0
+        || strcmp(a->nodetype, "PK")==0){
+        fprintf(yyout,"%s : %s \n", a->nodetype, ((struct phrase *)a->l)->c);
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "Title")==0
+        || strcmp(a->nodetype, "Author")==0
+        ){
+        fprintf(yyout,"%s: %s\n", a->nodetype, ((struct phrase *)a->l)->c);
+        if(a->l!=NULL)
+            writeOutput(a->l);
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "C")==0){
+        fprintf(yyout,"# ");
+        if(a->l!=NULL)
+            writeOutput(a->l);
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "S")==0){
+        fprintf(yyout,"## ");
+        if(a->l!=NULL)
+            writeOutput(a->l);
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "SB")==0){
+        fprintf(yyout,"### ");
+        if(a->l!=NULL)
+            writeOutput(a->l);
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "SSB")==0){
+        fprintf(yyout,"### ");
+        if(a->l!=NULL)
+            writeOutput(a->l);
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "PG")==0){
+        fprintf(yyout,"#### ");
+        if(a->l!=NULL)
+            writeOutput(a->l);
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "CC")==0){
+        fprintf(yyout,"%s\n", ((struct phrase *)a->l)->c);
+    }else if(strcmp(a->nodetype, "B")==0){
+        fprintf(yyout,"**%s**\n", ((struct phrase *)a->l)->c);
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "U")==0){
+        fprintf(yyout,"<u>%s</u>\n", ((struct phrase *)a->l)->c);
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "I")==0){
+        fprintf(yyout,"*%s*\n", ((struct phrase *)a->l)->c);
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "PH")==0){
+        if(a->l!=NULL)
+            fprintf(yyout,"%s\n", ((struct phrase *)a->l)->c);
+        if(a->r!=NULL)
+            writeOutput(a->r);
     }else if(strcmp(a->nodetype, "ITEM")==0){
         if(a->l!=NULL)
-            printf("-%s\n", ((struct phrase *)a->l)->c);
+            fprintf(yyout,"-%s\n", ((struct phrase *)a->l)->c);
     }else if(strcmp(a->nodetype, "ITEME")==0){
         if(a->l!=NULL)
-            printf("1.%s\n", ((struct phrase *)a->l)->c);
+            fprintf(yyout,"1.%s\n", ((struct phrase *)a->l)->c);
     }
-    
 }
 
 void yyerror(char *s, ...){
@@ -227,6 +208,7 @@ int main(int argc, char *argv[]){
         }
 
         yyin = input;
+        yyout = output;
         res = yyparse();
         if(!res){
             fclose(input);
