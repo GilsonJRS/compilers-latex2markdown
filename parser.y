@@ -22,7 +22,7 @@
 %token ENUMEND ITEM ITEMBEGIN ITEMEND MAKETITLE
 
 %type <c> phrase
-%type <a> conf id main body content lists enum item itemize latexDoc
+%type <a> conf id main body content lists enum item itemE itemize latexDoc sectionC
 
 %start latexDoc
 %%
@@ -41,34 +41,43 @@ id: TITLE '{' phrase '}' id { $$ = newast("Title", newPhrase($3), $5); }
     ;
 
 main: DOCBEGIN MAKETITLE body DOCEND { $$ = newast("Body", NULL, $3); }
-    | DOCBEGIN body DOCEND { printf("asdf"); $$ = newast("Body", NULL, $2); }
+    | DOCBEGIN body DOCEND { $$ = newast("Body", NULL, $2); }
     ;
 
 body: { $$ = NULL; }
-    | CHAPTER content body{ $$ = newast("C", $2, $3); }
-    | SECTION content body{ $$ = newast("S", $2, $3); }
-    | SUBSECTION content body{ $$ = newast("SB", $2, $3); }
-    | SUBSUBSECTION content body{ $$ = newast("SSB", $2, $3); }
-    | PARAGRAPH content body{ $$ = newast("PG", $2, $3); }
-    | content { $$ = newast("Co", $1, NULL); }
+    | CHAPTER sectionC body{ $$ = newast("C", $2, $3); }
+    | SECTION sectionC body{ $$ = newast("S", $2, $3); }
+    | SUBSECTION sectionC body{ $$ = newast("SB", $2, $3); }
+    | SUBSUBSECTION sectionC body{ $$ = newast("SSB", $2, $3); }
+    | PARAGRAPH sectionC body{ $$ = newast("PG", $2, $3); }
+    | content { $$ = newast("Co", NULL, $1); }
     ;
 
-content: { $$ = NULL; } 
-    |'{' phrase '}' content { $$ = newast("CC", newPhrase($2), $4); }
-    | BF '{' phrase '}' content { $$ = newast("B", newPhrase($3), $5); }
-    | UNDERLINE '{' phrase '}' content { $$ = newast("U", newPhrase($3), $5); }
-    | IT '{' phrase '}' content { $$ = newast("I", newPhrase($3), $5); }
-    | phrase content { $$ = newast("P", newPhrase($1), $2); }
-    | lists content { $$ = newast("L", $1, $2); }
+sectionC: { $$ = NULL; } 
+    | '{' '}' { $$ = NULL; }
+    | '{' phrase '}' { $$ = newast("CC", newPhrase($2), NULL); } 
+    ;
+
+content: BF '{' phrase '}' body { $$ = newast("B", newPhrase($3), $5); }
+    | UNDERLINE '{' phrase '}' body { $$ = newast("U", newPhrase($3), $5); }
+    | IT '{' phrase '}' body { $$ = newast("I", newPhrase($3), $5); }
+    | phrase body { $$ = newast("PH", newPhrase($1), $2); }
+    | lists body { $$ = newast("L", $1, $2); }
+    | body
     ;
 
 lists: ENUMBEGIN enum ENUMEND { $$ = newast("E", $2, NULL); }
     | ITEMBEGIN itemize ITEMEND { $$ = newast("IT", $2, NULL); }
     ;
 
-enum: item { $$ = newast("E", $1, NULL); }
-    | item enum { $$ = newast("E", $1, $2); }
+enum: itemE { $$ = newast("E", $1, NULL); }
+    | itemE enum { $$ = newast("E", $1, $2); }
     | lists { $$ = newast("E", $1, NULL); }
+    ;
+
+itemE:{ $$ = NULL; }
+    | ITEM '{' phrase '}' { $$ = newast("ITEME", newPhrase($3), NULL); }
+    | ITEM phrase { $$ = newast("ITEME", newPhrase($2), NULL);}
     ;
 
 itemize: item { $$ = newast("IT", $1, NULL); }
@@ -81,8 +90,8 @@ item: { $$ = NULL; }
     | ITEM phrase { $$ = newast("ITEM", newPhrase($2), NULL);}
     ;
 
-phrase: WORD phrase { $$ = strcat($1, $2); $$ = $1; }
-    | ACCE phrase { $$ = strcat($1, $2); $$ = $1; }
+phrase: WORD phrase { catstr(&$1, $2); $$ = strcat($1, $2); $$ = $1; }
+    | ACCE phrase { catstr(&$1, $2); $$ = strcat($1, $2); $$ = $1; }
     | WORD 
     | ACCE 
     ;
