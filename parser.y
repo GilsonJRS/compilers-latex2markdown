@@ -71,6 +71,7 @@ lists: ENUMBEGIN enum ENUMEND { $$ = newast("ENUM", $2, NULL); }
 
 enum: itemE { $$ = newast("E", $1, NULL); }
     | itemE enum { $$ = newast("E", $1, $2); }
+    | lists enum { $$ = newast("E", $1, $2); }
     | lists { $$ = newast("E", $1, NULL); }
     ;
 
@@ -81,6 +82,7 @@ itemE:{ $$ = NULL; }
 
 itemize: item { $$ = newast("IT", $1, NULL); }
     | item itemize { $$ = newast("IT", $1, $2); }
+    | lists itemize { $$ = newast("IT", $1, $2); }
     | lists { $$ = newast("IT", $1, NULL); }
     ;
 
