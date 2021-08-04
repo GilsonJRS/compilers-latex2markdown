@@ -15,7 +15,7 @@
 }
 
 /* token declaration */
-%token <c> WORD ACCE
+%token <c> WORD ACCE EOL
 
 %token DOCCLASS PACKAGE TITLE AUTHOR DOCBEGIN DOCEND CHAPTER SECTION
 %token SUBSECTION SUBSUBSECTION PARAGRAPH BF UNDERLINE IT ENUMBEGIN
@@ -33,7 +33,7 @@ latexDoc: DOCCLASS conf id main { $$ = newast("Begin", $2, newast("Main",$3,$4))
 conf:{ $$ = NULL; } 
     |'[' phrase ']' conf { $$ = newast("Opts", newPhrase($2), $4); }
     |'{' WORD '}' conf { $$ = newast("Class", newPhrase($2), $4); }
-    | PACKAGE '{' phrase '}' conf { $$ = newast("PK", newPhrase($3), $5); }
+    | PACKAGE '{' phrase '}' conf{ $$ = newast("PK", newPhrase($3), $5); }
     ;
 
 id: TITLE '{' phrase '}' id { $$ = newast("Title", newPhrase($3), $5); }
@@ -63,11 +63,10 @@ content: BF '{' phrase '}' body { $$ = newast("B", newPhrase($3), $5); }
     | IT '{' phrase '}' body { $$ = newast("I", newPhrase($3), $5); }
     | phrase body { $$ = newast("PH", newPhrase($1), $2); }
     | lists body { $$ = newast("L", $1, $2); }
-    | body
     ;
 
-lists: ENUMBEGIN enum ENUMEND { $$ = newast("E", $2, NULL); }
-    | ITEMBEGIN itemize ITEMEND { $$ = newast("IT", $2, NULL); }
+lists: ENUMBEGIN enum ENUMEND { $$ = newast("ENUM", $2, NULL); }
+    | ITEMBEGIN itemize ITEMEND { $$ = newast("ITEMI", $2, NULL); }
     ;
 
 enum: itemE { $$ = newast("E", $1, NULL); }
@@ -81,7 +80,7 @@ itemE:{ $$ = NULL; }
     ;
 
 itemize: item { $$ = newast("IT", $1, NULL); }
-    | item enum { $$ = newast("IT", $1, $2); }
+    | item itemize { $$ = newast("IT", $1, $2); }
     | lists { $$ = newast("IT", $1, NULL); }
     ;
 
@@ -92,7 +91,9 @@ item: { $$ = NULL; }
 
 phrase: WORD phrase { catstr(&$1, $2); $$ = strcat($1, $2); $$ = $1; }
     | ACCE phrase { catstr(&$1, $2); $$ = strcat($1, $2); $$ = $1; }
+    | EOL phrase { catstr(&$1, $2); $$ = strcat($1, $2); $$ = $1; }
     | WORD 
-    | ACCE 
+    | ACCE
+    | EOL
     ;
 
