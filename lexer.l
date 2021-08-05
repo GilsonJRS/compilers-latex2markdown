@@ -24,9 +24,9 @@
 "\\subsection" { return SUBSECTION; }
 "\\subsubsection" { return SUBSUBSECTION; }
 "\\paragraph" { return PARAGRAPH; }
-"\\bf" { return BF; }
+"\\textbf" { return BF; }
 "\\underline" { return UNDERLINE; }
-"\\it" { return IT; }
+"\\textit" { return IT; }
 "\\begin{enumerate}" { return ENUMBEGIN; }
 "\\end{enumerate}" { return ENUMEND; }
 "\\item" { return ITEM; }
