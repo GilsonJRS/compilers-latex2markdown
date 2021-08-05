@@ -8,7 +8,9 @@
 #include <string.h>
 #include <math.h>
 #include "header.h"
+int LL;
 
+//creates new ast subtree
 struct ast *newast(char *nodetype, struct ast *l, struct ast *r){
     struct ast *a = malloc(sizeof(struct ast));
 
@@ -22,6 +24,7 @@ struct ast *newast(char *nodetype, struct ast *l, struct ast *r){
     return a;
 }
 
+//create new phrase node 
 struct ast *newPhrase(char *c){
     struct phrase *a = malloc(sizeof(struct phrase));
 
@@ -34,63 +37,55 @@ struct ast *newPhrase(char *c){
     return (struct ast *)a;
 }
 
-
-/* free AST */
+//free ast
 void treefree(struct ast *a){
     if(a==NULL) return;
-    if(strcmp(a->nodetype, "Begin")==0){
-        treefree(a->l);
-        treefree(a->r);
-    }
-    else if(strcmp(a->nodetype, "Opts")==0
-        || strcmp(a->nodetype, "Class")==0
-        || strcmp(a->nodetype, "PK")==0){
-        free(((struct phrase *)a->l)->c);
-        treefree(a->r);
-    }
-    else if(strcmp(a->nodetype, "Body")==0
-        || strcmp(a->nodetype, "Co")==0){
-        if(a->l!=NULL)
-            treefree(a->l);
-    } else if(strcmp(a->nodetype, "Opts")==0
-        || strcmp(a->nodetype, "Class")==0
-        || strcmp(a->nodetype, "PK")==0
-        || strcmp(a->nodetype, "CC")==0
-        || strcmp(a->nodetype, "B")==0
-        || strcmp(a->nodetype, "U")==0
-        || strcmp(a->nodetype, "I")==0
-        || strcmp(a->nodetype, "P")==0
-        ){
-        free(((struct phrase *)a->l)->c);
-        treefree(a->r);
-    }else if(strcmp(a->nodetype, "C")==0
+    if(strcmp(a->nodetype, "Begin")==0
+        || strcmp(a->nodetype, "Main")==0
+        || strcmp(a->nodetype, "C")==0
         || strcmp(a->nodetype, "S")==0
         || strcmp(a->nodetype, "SB")==0
         || strcmp(a->nodetype, "SSB")==0
         || strcmp(a->nodetype, "PG")==0
-        ){
-        treefree(a->l);
-        treefree(a->r);
-    }else if(strcmp(a->nodetype, "E")==0
-        || strcmp(a->nodetype, "IT")==0){
-        if(a->l != NULL)
-            treefree(a->l);
-        if(a->r != NULL)
+        || strcmp(a->nodetype, "IT")==0
+        || strcmp(a->nodetype, "E")==0
+        || strcmp(a->nodetype, "ENUM")==0
+        || strcmp(a->nodetype, "ITEMI")==0
+        || strcmp(a->nodetype, "L")==0){
+            if(a->l!=NULL)
+                treefree(a->l);
+            if(a->r!=NULL)
+                treefree(a->r);
+    }
+    else if(strcmp(a->nodetype, "Body")==0
+        || strcmp(a->nodetype, "Co")==0){
+        if(a->r!=NULL)
             treefree(a->r);
-    }else if(strcmp(a->nodetype, "ITEM")==0){
+    }else if(strcmp(a->nodetype, "Class")==0
+        || strcmp(a->nodetype, "Opts")==0
+        || strcmp(a->nodetype, "PK")==0
+        || strcmp(a->nodetype, "B")==0
+        || strcmp(a->nodetype, "U")==0
+        || strcmp(a->nodetype, "I")==0
+        || strcmp(a->nodetype, "PH")==0){
         free(((struct phrase *)a->l)->c);
-    } 
-
+        free(a->l);
+        if(a->r!=NULL)
+            treefree(a->r);
+    }else if(strcmp(a->nodetype, "CC")==0
+        || strcmp(a->nodetype, "ITEME")==0
+        || strcmp(a->nodetype, "ITEM")==0){
+        free(((struct phrase *)a->l)->c);
+        free(a->l);
+    }
     free(a);
 }
 
+//write output markdown file
 void writeOutput(struct ast *a){
     if(a==NULL) return;
     if(strcmp(a->nodetype, "Begin")==0
-        || strcmp(a->nodetype, "Main")==0
-        || strcmp(a->nodetype, "L")==0
-        || strcmp(a->nodetype, "E")==0
-        || strcmp(a->nodetype, "IT")==0){
+        || strcmp(a->nodetype, "Main")==0){
         if(a->l!=NULL)
             writeOutput(a->l);
         if(a->r!=NULL)
@@ -109,37 +104,38 @@ void writeOutput(struct ast *a){
     }else if(strcmp(a->nodetype, "Title")==0
         || strcmp(a->nodetype, "Author")==0
         ){
-        fprintf(yyout,"%s: %s\n", a->nodetype, ((struct phrase *)a->l)->c);
+        char *s = {strcmp(a->nodetype, "Title")==0 ? "# " : "#### "};
+        fprintf(yyout,"%s %s: %s\n", s, a->nodetype, ((struct phrase *)a->l)->c);
         if(a->l!=NULL)
             writeOutput(a->l);
         if(a->r!=NULL)
             writeOutput(a->r);
     }else if(strcmp(a->nodetype, "C")==0){
-        fprintf(yyout,"# ");
-        if(a->l!=NULL)
-            writeOutput(a->l);
-        if(a->r!=NULL)
-            writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "S")==0){
         fprintf(yyout,"## ");
         if(a->l!=NULL)
             writeOutput(a->l);
         if(a->r!=NULL)
             writeOutput(a->r);
-    }else if(strcmp(a->nodetype, "SB")==0){
+    }else if(strcmp(a->nodetype, "S")==0){
         fprintf(yyout,"### ");
+        if(a->l!=NULL)
+            writeOutput(a->l);
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "SB")==0){
+        fprintf(yyout,"#### ");
         if(a->l!=NULL)
             writeOutput(a->l);
         if(a->r!=NULL)
             writeOutput(a->r);
     }else if(strcmp(a->nodetype, "SSB")==0){
-        fprintf(yyout,"### ");
+        fprintf(yyout,"##### ");
         if(a->l!=NULL)
             writeOutput(a->l);
         if(a->r!=NULL)
             writeOutput(a->r);
     }else if(strcmp(a->nodetype, "PG")==0){
-        fprintf(yyout,"#### ");
+        fprintf(yyout,"###### ");
         if(a->l!=NULL)
             writeOutput(a->l);
         if(a->r!=NULL)
@@ -160,18 +156,61 @@ void writeOutput(struct ast *a){
             writeOutput(a->r);
     }else if(strcmp(a->nodetype, "PH")==0){
         if(a->l!=NULL)
-            fprintf(yyout,"%s\n", ((struct phrase *)a->l)->c);
+            fprintf(yyout,"%s\n\n", ((struct phrase *)a->l)->c);
         if(a->r!=NULL)
             writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "L")==0){
+        LL=-1;
+        fprintf(yyout,"\n");
+        if(a->l!=NULL)
+            writeOutput(a->l);
+        fprintf(yyout,"\n");
+        if(a->r!=NULL)
+            writeOutput(a->r);
+    }else if(strcmp(a->nodetype, "ENUM")==0
+        || strcmp(a->nodetype, "ITEMI")==0){
+            LL++;
+            if(a->l!=NULL)
+                writeOutput(a->l);
+            LL--;
+    }else if(strcmp(a->nodetype, "E")==0
+        || strcmp(a->nodetype, "IT")==0){
+            if(a->l!=NULL)
+                writeOutput(a->l);
+            if(a->r!=NULL)
+                writeOutput(a->r);/*
+            else
+                fprintf(yyout,"\n");*/
     }else if(strcmp(a->nodetype, "ITEM")==0){
+        char *s;
+        if(LL > 0){
+            s = (char *)calloc(LL,sizeof(char));
+            int i = 0;
+            for(i;i<LL;i++)
+                strcat(s, "\t");
+        }else{
+            s = (char *)calloc(1,1);
+        }
         if(a->l!=NULL)
-            fprintf(yyout,"-%s\n", ((struct phrase *)a->l)->c);
+            fprintf(yyout,"%s-%s\n", s,((struct phrase *)a->l)->c);
+        free(s);
     }else if(strcmp(a->nodetype, "ITEME")==0){
+        char *s;
+        if(LL > 0){
+            s = (char *)calloc(LL, sizeof(char));
+            int i = 0;
+            for(i;i<LL;i++)
+                strcat(s, "\t");
+        }else{
+            s = (char *)calloc(1,1);
+        }
         if(a->l!=NULL)
-            fprintf(yyout,"1.%s\n", ((struct phrase *)a->l)->c);
+            fprintf(yyout,"%s1.%s\n", s, ((struct phrase *)a->l)->c);
+        free(s);
     }
 }
 
+//to print erros
 void yyerror(char *s, ...){
     va_list ap;
     va_start(ap,s);
@@ -181,6 +220,7 @@ void yyerror(char *s, ...){
     fprintf(stderr, "\n");
 }
 
+//realloc space for strings
 void catstr(char **s1, char *s2){
     int i=0, j=0;
     char *ss1 = *s1, *ss2=s2;
@@ -217,8 +257,6 @@ int main(int argc, char *argv[]){
             fclose(input);
             fclose(output);
             remove(argv[i+1]);
-        }
-        
+        }     
     }
-    
 }

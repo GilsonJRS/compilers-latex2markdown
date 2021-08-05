@@ -35,9 +35,10 @@
 "\\maketitle" { return MAKETITLE; }
 
 "%".* {/* comment */}
+([a-zA-Z0-9]?"."\n) { yylval.c = strdup(".\n\n"); return EOL; }
 " "|"."|"," { yylval.c = strdup(yytext); return ACCE; }
 [a-zA-Z0-9]+   { yylval.c = strdup(yytext); return WORD; }
+\n {}
 [ \t] {}
-\n 
 . 
 %%
